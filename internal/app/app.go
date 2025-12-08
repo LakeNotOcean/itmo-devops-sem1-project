@@ -9,6 +9,9 @@ import (
 	"os"
 	"os/signal"
 	"sem1-final-project-hard-level/internal/config"
+	custommiddleware "sem1-final-project-hard-level/internal/custom_middlewares"
+	"sem1-final-project-hard-level/internal/dto"
+	"sem1-final-project-hard-level/internal/handlers"
 	"syscall"
 	"time"
 
@@ -45,10 +48,12 @@ func (a *App) Run() error {
 	}))
 	r.Use(httprate.LimitByIP(100, 1*time.Minute))
 
-	// priceHandler := handlers.NewPriceHandler()
+	priceHandler := handlers.NewPriceHandler()
+
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/v0", func(r chi.Router) {
-			r.Route("/prices", func(r chi.Router) {})
+			r.With(custommiddleware.QueryParserMiddleware[dto.GetPricesQueryParamsDto](nil))
+			r.Route("/prices", func(r chi.Router) { r.Get("/", priceHandler.GetPrices) })
 		})
 	})
 
