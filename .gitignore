@@ -10,8 +10,7 @@ vendor
 .cache/
 
 # Editor/IDE specific files
-.idea/
-.vscode/
+build
 *.swp
 *~
 .DS_Store
