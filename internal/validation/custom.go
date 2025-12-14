@@ -11,6 +11,7 @@ type Validator interface {
 	Register(validate *validator.Validate) error
 }
 
+// Функция для регистрации валидаторов из массива валидаторов
 func RegisterCustomValidators(v *validator.Validate) error {
 	for _, validator := range registry {
 		if err := validator.Register(v); err != nil {
@@ -20,6 +21,7 @@ func RegisterCustomValidators(v *validator.Validate) error {
 	return nil
 }
 
+// Функция добавления валидатора в массив валидаторов
 func Register(v Validator) {
 	registry = append(registry, v)
 }

@@ -24,7 +24,8 @@ func (h *PriceHandler) GetPrices(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Используем params
-	fmt.Printf("Max: %d, Min: %d, Start: %v, End: %v \n", *params.Max, *params.Min, params.Start, params.End)
+	fmt.Printf("Max: %v, Min: %v, Start: %v, End: %v \n", params.Max, params.Min, params.Start, params.End)
+	w.WriteHeader(http.StatusOK)
 }
 
 // func ListUsersHandler(w http.ResponseWriter, r *http.Request) {

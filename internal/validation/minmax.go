@@ -4,7 +4,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// Валидатор работает с указателями
+// Валидатор работает с указателями *int
 type MinMaxValidator struct{}
 
 const (
@@ -32,12 +32,12 @@ func (MinMaxValidator) Validate(fl validator.FieldLevel) bool {
 		return true
 	}
 
-	if maxField.IsNil() || minField.IsNil() {
+	maxVal, maxOk := Deref[int](maxField)
+	minVal, minOk := Deref[int](minField)
+
+	if !maxOk || !minOk {
 		return true
 	}
-
-	maxVal := maxField.Elem().Int()
-	minVal := minField.Elem().Int()
 
 	return minVal <= maxVal
 }

@@ -40,6 +40,8 @@ func QueryParserMiddleware[T any](config *QueryParserConfig) func(http.Handler) 
 				return
 			}
 
+			SetEnumDefaults(&params)
+
 			if err := config.Validator.Struct(params); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return

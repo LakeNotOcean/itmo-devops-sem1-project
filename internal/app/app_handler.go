@@ -32,8 +32,7 @@ func GetChiRouter() *chi.Mux {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/v0", func(r chi.Router) {
-			r.Use(custommiddleware.QueryParserMiddleware[dto.GetPricesQueryParamsDto](nil))
-			r.Get("/prices", priceHandler.GetPrices)
+			r.With(custommiddleware.QueryParserMiddleware[dto.GetPricesQueryParamsDto](nil)).Get("/prices", priceHandler.GetPrices)
 		})
 	})
 
