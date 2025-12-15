@@ -1,6 +1,7 @@
 package app
 
 import (
+	"sem1-final-project-hard-level/internal/config"
 	custommiddleware "sem1-final-project-hard-level/internal/custom_middlewares"
 	"sem1-final-project-hard-level/internal/dto"
 	"sem1-final-project-hard-level/internal/handlers"
@@ -12,7 +13,7 @@ import (
 	"github.com/go-chi/httprate"
 )
 
-func GetChiRouter() *chi.Mux {
+func GetChiRouter(cfg *config.Config) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
@@ -28,11 +29,12 @@ func GetChiRouter() *chi.Mux {
 	}))
 	r.Use(httprate.LimitByIP(100, 1*time.Minute))
 
-	priceHandler := handlers.NewPriceHandler()
+	priceHandler := handlers.NewPriceHandler(cfg)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/v0", func(r chi.Router) {
 			r.With(custommiddleware.QueryParserMiddleware[dto.GetPricesQueryParamsDto](nil)).Get("/prices", priceHandler.GetPrices)
+			r.With(custommiddleware.QueryParserMiddleware[dto.UploadPricesQueryParams](nil)).Post("/prices", priceHandler.UploadPrices)
 		})
 	})
 

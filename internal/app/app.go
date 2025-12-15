@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"sem1-final-project-hard-level/internal/config"
+	"sem1-final-project-hard-level/internal/database"
 	"syscall"
 	"time"
 )
@@ -28,9 +29,12 @@ func (a *App) Run() error {
 
 	addr := fmt.Sprintf(":%d", a.config.Port)
 
+	if err := database.InitDb(a.config); err != nil {
+		return fmt.Errorf("failed to initialize database: %w", err)
+	}
 	a.server = &http.Server{
 		Addr:         addr,
-		Handler:      GetChiRouter(),
+		Handler:      GetChiRouter(a.config),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  time.Duration(a.config.IdleTimeout) * time.Second,

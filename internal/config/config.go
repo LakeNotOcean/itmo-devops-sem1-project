@@ -11,6 +11,13 @@ import (
 type Config struct {
 	Port        int
 	IdleTimeout int
+	MaxFileSize int64
+
+	DbHost     string
+	DbUser     string
+	DbPassword string
+	DbPort     int
+	DbName     string
 }
 
 func Load() *Config {
@@ -22,11 +29,17 @@ func Load() *Config {
 	return &Config{
 		Port:        getEnv("PORT", 3000),
 		IdleTimeout: getEnv("IDLE_TIMEOUT", 60),
+		MaxFileSize: getEnv[int64]("MAX_FILE_SIZE", 100),
+		DbHost:      getEnv("DB_HOST", "localhost"),
+		DbUser:      getEnv("DB_USER", "user"),
+		DbPassword:  getEnv("DB_PASSWORD", "password"),
+		DbPort:      getEnv("DB_PORT", 5432),
+		DbName:      getEnv("DB_NAME", "postgres"),
 	}
 
 }
 
-func getEnv[T string | bool | int](key string, defaultValue T) T {
+func getEnv[T string | bool | int | int64](key string, defaultValue T) T {
 	value, exists := os.LookupEnv(key)
 	if !exists {
 		return defaultValue

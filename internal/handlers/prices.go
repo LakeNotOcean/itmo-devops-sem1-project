@@ -1,18 +1,24 @@
 package handlers
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"sem1-final-project-hard-level/internal/config"
 	custommiddleware "sem1-final-project-hard-level/internal/custom_middlewares"
+	"sem1-final-project-hard-level/internal/database"
 	"sem1-final-project-hard-level/internal/dto"
+	"strings"
+
+	"gorm.io/gorm"
 )
 
 type PriceHandler struct {
-	// ct
+	db          *gorm.DB
+	maxFileSize int64
 }
 
-func NewPriceHandler() *PriceHandler {
-	return &PriceHandler{}
+func NewPriceHandler(cfg *config.Config) *PriceHandler {
+	return &PriceHandler{db: database.GetDb(), maxFileSize: cfg.MaxFileSize}
 }
 
 func (h *PriceHandler) GetPrices(w http.ResponseWriter, r *http.Request) {
@@ -24,17 +30,17 @@ func (h *PriceHandler) GetPrices(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Используем params
-	fmt.Printf("Max: %v, Min: %v, Start: %v, End: %v \n", params.Max, params.Min, params.Start, params.End)
+	log.Printf("Max: %v, Min: %v, Start: %v, End: %v \n", params.Max, params.Min, params.Start, params.End)
 	w.WriteHeader(http.StatusOK)
 }
 
-// func ListUsersHandler(w http.ResponseWriter, r *http.Request) {
-//     params, err := middleware.GetQueryParamsFromContext[ListUsersQuery](r.Context())
-//     if err != nil {
-//         http.Error(w, err.Error(), http.StatusInternalServerError)
-//         return
-//     }
+func (h *PriceHandler) UploadPrices(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, h.maxFileSize<<20)
 
-//     // Используем params
-//     fmt.Printf("Page: %d, Limit: %d\n", params.Page, params.Limit)
-// }
+	contentType := r.Header.Get("Content-Type")
+	if !strings.Contains(contentType, "multipart/form-data") {
+		http.Error(w, "Expected multipart/form-data", http.StatusBadRequest)
+		return
+	}
+
+}
