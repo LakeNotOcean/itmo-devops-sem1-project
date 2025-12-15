@@ -13,28 +13,28 @@ type Config struct {
 	IdleTimeout int
 	MaxFileSize int64
 
-	DbHost     string
+	DbName     string
 	DbUser     string
 	DbPassword string
 	DbPort     int
-	DbName     string
+	DbHost     string
 }
 
 func Load() *Config {
-	err := godotenv.Load("./config/env")
+	err := godotenv.Load("./configs/.env")
 	if err != nil {
 		log.Println("No .env file found, using environment variables")
 	}
 
 	return &Config{
-		Port:        getEnv("PORT", 3000),
+		Port:        getEnv("PORT", 8080),
 		IdleTimeout: getEnv("IDLE_TIMEOUT", 60),
 		MaxFileSize: getEnv[int64]("MAX_FILE_SIZE", 100),
-		DbHost:      getEnv("DB_HOST", "localhost"),
-		DbUser:      getEnv("DB_USER", "user"),
-		DbPassword:  getEnv("DB_PASSWORD", "password"),
+		DbName:      getEnv("POSTGRES_DB", "postgres"),
+		DbUser:      getEnv("POSTGRES_USER", "user"),
+		DbPassword:  getEnv("POSTGRES_PASSWORD", "password"),
 		DbPort:      getEnv("DB_PORT", 5432),
-		DbName:      getEnv("DB_NAME", "postgres"),
+		DbHost:      getEnv("DB_HOST", "localhost"),
 	}
 
 }
