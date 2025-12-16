@@ -12,6 +12,7 @@ type Config struct {
 	Port        int
 	IdleTimeout int
 	MaxFileSize int64
+	TempFileDir string
 
 	DbName     string
 	DbUser     string
@@ -30,6 +31,7 @@ func Load() *Config {
 		Port:        getEnv("PORT", 8080),
 		IdleTimeout: getEnv("IDLE_TIMEOUT", 60),
 		MaxFileSize: getEnv[int64]("MAX_FILE_SIZE", 100),
+		TempFileDir: getEnv("TEMP_FILE_DIR", "temp"),
 		DbName:      getEnv("POSTGRES_DB", "postgres"),
 		DbUser:      getEnv("POSTGRES_USER", "user"),
 		DbPassword:  getEnv("POSTGRES_PASSWORD", "password"),
