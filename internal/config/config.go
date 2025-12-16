@@ -3,16 +3,21 @@ package config
 import (
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/joho/godotenv"
+	"gorm.io/gorm/logger"
 )
 
 type Config struct {
-	Port        int
-	IdleTimeout int
-	MaxFileSize int64
-	TempFileDir string
+	Port         int
+	IdleTimeout  int
+	MaxFileSize  int64
+	TempFileDir  string
+	DataFileName string
+	BatchSize    int
+	logLevel     logger.LogLevel
 
 	DbName     string
 	DbUser     string
@@ -26,22 +31,27 @@ func Load() *Config {
 	if err != nil {
 		log.Println("No .env file found, using environment variables")
 	}
+	exe, _ := os.Executable()
+	exeDir := filepath.Dir(exe)
 
 	return &Config{
-		Port:        getEnv("PORT", 8080),
-		IdleTimeout: getEnv("IDLE_TIMEOUT", 60),
-		MaxFileSize: getEnv[int64]("MAX_FILE_SIZE", 100),
-		TempFileDir: getEnv("TEMP_FILE_DIR", "temp"),
-		DbName:      getEnv("POSTGRES_DB", "postgres"),
-		DbUser:      getEnv("POSTGRES_USER", "user"),
-		DbPassword:  getEnv("POSTGRES_PASSWORD", "password"),
-		DbPort:      getEnv("DB_PORT", 5432),
-		DbHost:      getEnv("DB_HOST", "localhost"),
+		Port:         getEnv("PORT", 8080),
+		IdleTimeout:  getEnv("IDLE_TIMEOUT", 60),
+		MaxFileSize:  getEnv[int64]("MAX_FILE_SIZE", 100),
+		TempFileDir:  filepath.Join(exeDir, getEnv("TEMP_FILE_DIR", "temp")),
+		DataFileName: getEnv("DATA_FILE_NAME", "data.csv"),
+		BatchSize:    getEnv("BATCH_SIZE", 500),
+		logLevel:     getEnv[logger.LogLevel]("LOG_LEVEL", logger.Info),
+		DbName:       getEnv("POSTGRES_DB", "postgres"),
+		DbUser:       getEnv("POSTGRES_USER", "postgres"),
+		DbPassword:   getEnv("POSTGRES_PASSWORD", "password"),
+		DbPort:       getEnv("DB_PORT", 5432),
+		DbHost:       getEnv("DB_HOST", "localhost"),
 	}
 
 }
 
-func getEnv[T string | bool | int | int64](key string, defaultValue T) T {
+func getEnv[T string | bool | int | int64 | logger.LogLevel](key string, defaultValue T) T {
 	value, exists := os.LookupEnv(key)
 	if !exists {
 		return defaultValue

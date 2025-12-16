@@ -4,7 +4,7 @@ import (
 	"sem1-final-project-hard-level/internal/config"
 	custommiddleware "sem1-final-project-hard-level/internal/custom_middlewares"
 	"sem1-final-project-hard-level/internal/dto"
-	"sem1-final-project-hard-level/internal/handlers"
+	handlers "sem1-final-project-hard-level/internal/handlers/prices"
 	"time"
 
 	"github.com/go-chi/chi/v5"

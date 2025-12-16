@@ -1,46 +1,19 @@
-package handlers
+package prices
 
 import (
-	"os"
+	"fmt"
 	"sem1-final-project-hard-level/internal/dto"
+
+	"gorm.io/gorm"
 )
 
-func HandlePricesFile(tempFile *os.File, format dto.FormatType) (*dto.UploadPricesResult, error) {
+func handlePricesFile(db *gorm.DB, filePath string, dataFileName string, batchSize int, format dto.FormatType) (*dto.UploadPricesResult, error) {
 	switch format {
 	case dto.FormatZip:
+		return handleZipFile(db, filePath, dataFileName, batchSize)
 	case dto.FormatTar:
-		()
+		return handleTarFile(db, filePath, dataFileName, batchSize)
 	default:
-		return fmt.Errorf("invalid format: %s, allowed values: zip, tar", str)
+		return nil, fmt.Errorf("invalid format: %s, allowed values: zip, tar", format.String())
 	}
-}
-
-func processTarFile() {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	tarReader := tar.NewReader(file)
-
-	// Ищем файл data.csv в архиве
-	for {
-		header, err := tarReader.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-
-		if header.Name == "data.csv" || filepath.Base(header.Name) == "data.csv" {
-			return h.processCSV(tarReader)
-		}
-	}
-
-	return nil, fmt.Errorf("data.csv not found in archive")
-}
-func handleCSV() {
-
 }

@@ -32,6 +32,11 @@ func (a *App) Run() error {
 	if err := database.InitDb(a.config); err != nil {
 		return fmt.Errorf("failed to initialize database: %w", err)
 	}
+
+	if err := os.MkdirAll(a.config.TempFileDir, 0755); err != nil {
+		return fmt.Errorf("failed to create temp directory %s: %w", a.config.TempFileDir, err)
+	}
+
 	a.server = &http.Server{
 		Addr:         addr,
 		Handler:      GetChiRouter(a.config),
