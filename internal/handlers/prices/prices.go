@@ -11,6 +11,8 @@ import (
 	custommiddleware "sem1-final-project-hard-level/internal/custom_middlewares"
 	"sem1-final-project-hard-level/internal/database"
 	"sem1-final-project-hard-level/internal/dto"
+	archivehelpers "sem1-final-project-hard-level/internal/handlers/prices/archive_helpers"
+	databasehelpers "sem1-final-project-hard-level/internal/handlers/prices/database_helpers"
 
 	"gorm.io/gorm"
 )
@@ -35,6 +37,7 @@ func (h *PriceHandler) GetPrices(w http.ResponseWriter, r *http.Request) {
 	params, err := custommiddleware.GetQueryParamsFromContext[dto.GetPricesQueryParamsDto](r.Context())
 
 	if err != nil {
+		log.Printf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -42,23 +45,26 @@ func (h *PriceHandler) GetPrices(w http.ResponseWriter, r *http.Request) {
 	log.Printf("GetPrices params - Start: %s, End: %s, Min: %v, Max: %v\n",
 		params.Start, params.End, params.Min, params.Max)
 
-	prices, err := fetchPricesFromDB(h.db, params)
+	prices, err := databasehelpers.FetchPricesFromDB(h.db, params)
 	if err != nil {
+		log.Printf("Error: %v", err)
 		http.Error(w, fmt.Sprintf("Failed to fetch prices: %v", err), http.StatusInternalServerError)
 		return
 	}
-	archiveBytes, err := createPricesArchive(prices, h.dataFileName)
+	archiveBytes, err := archivehelpers.CreatePricesArchive(prices, h.dataFileName)
 	if err != nil {
+		log.Printf("Error: %v", err)
 		http.Error(w, fmt.Sprintf("Failed to create archive: %v", err), http.StatusInternalServerError)
 		return
 	}
-	sendArchiveToClient(w, archiveBytes, h.dataFileName)
+	archivehelpers.SendArchiveToClient(w, archiveBytes, h.dataFileName)
 }
 
 func (h *PriceHandler) UploadPrices(w http.ResponseWriter, r *http.Request) {
 	// query-параметры для типа файла
 	params, err := custommiddleware.GetQueryParamsFromContext[dto.UploadPricesQueryParams](r.Context())
 	if err != nil {
+		log.Printf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -98,6 +104,7 @@ func (h *PriceHandler) UploadPrices(w http.ResponseWriter, r *http.Request) {
 	result, err := handlePricesFile(h.db, tempFile.Name(), h.dataFileName, h.batchSize, params.Format)
 
 	if err != nil {
+		log.Printf("Error: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -11,7 +11,8 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/app/sem1-final-project-hard-level/main.go",
             "output": "${workspaceFolder}/build/debug/app.exe",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/configs/.env"
         }
     ]
 }

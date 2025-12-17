@@ -1,4 +1,4 @@
-package prices
+package archivehelpers
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 // отправка готового контента
-func sendArchiveToClient(w http.ResponseWriter, archiveBytes []byte, dataFileName string) {
+func SendArchiveToClient(w http.ResponseWriter, archiveBytes []byte, dataFileName string) {
 	w.Header().Set("Content-Type", "application/zip")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", dataFileName+".zip"))
 	w.Header().Set("Content-Length", strconv.Itoa(len(archiveBytes)))

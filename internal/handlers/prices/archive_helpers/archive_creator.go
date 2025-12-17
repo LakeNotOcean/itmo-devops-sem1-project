@@ -1,4 +1,4 @@
-package prices
+package archivehelpers
 
 import (
 	"archive/zip"
@@ -11,7 +11,7 @@ import (
 )
 
 // создание архива с ценами
-func createPricesArchive(prices []models.Prices, dataFileName string) ([]byte, error) {
+func CreatePricesArchive(prices []models.Prices, dataFileName string) ([]byte, error) {
 	// csv в памяти сервиса, не лучший вариант, но работает
 	csvData, err := createCSVData(prices)
 	if err != nil {
@@ -22,7 +22,7 @@ func createPricesArchive(prices []models.Prices, dataFileName string) ([]byte, e
 	zipWriter := zip.NewWriter(zipBuffer)
 
 	// файл в архиве
-	csvFileInZip, err := zipWriter.Create(dataFileName)
+	csvFileInZip, err := zipWriter.Create(dataFileName + ".csv")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create file in ZIP: %v", err)
 	}

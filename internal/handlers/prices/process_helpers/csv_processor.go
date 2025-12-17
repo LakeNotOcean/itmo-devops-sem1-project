@@ -1,4 +1,4 @@
-package prices
+package processhelpers
 
 import (
 	"encoding/csv"
@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func handleCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPricesResult, error) {
+func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPricesResult, error) {
 	// лучше выполнять в одной транзакции
 	// если что - откат
 	tx := db.Begin()

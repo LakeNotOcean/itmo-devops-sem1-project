@@ -1,4 +1,4 @@
-package prices
+package databasehelpers
 
 import (
 	"sem1-final-project-hard-level/internal/database/models"
@@ -10,7 +10,7 @@ import (
 )
 
 // список цен согласно фильтрам
-func fetchPricesFromDB(db *gorm.DB, params *dto.GetPricesQueryParamsDto) ([]models.Prices, error) {
+func FetchPricesFromDB(db *gorm.DB, params *dto.GetPricesQueryParamsDto) ([]models.Prices, error) {
 	query := buildQuery(db, params)
 
 	var prices []models.Prices

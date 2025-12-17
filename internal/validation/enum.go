@@ -9,9 +9,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-// Используется в формате enum_value=default_value|value1|value2
-// default_value устанавливается при отсутствии значения
-// Работает для указателей
+// используется в формате enum_value=default_value|value1|value2
+// работает для указателей
 type EnumValidator struct{}
 
 const (

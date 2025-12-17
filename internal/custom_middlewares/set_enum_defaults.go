@@ -27,8 +27,7 @@ func SetEnumDefaults[T any](params *T) {
 				panic(validation.GetInvalidValidatorFormatMessage(fieldType.Name))
 			}
 
-			enumParams := strings.Split(parts[1], " ")[0]
-			enumValues := strings.Split(enumParams, ";")
+			enumValues := strings.Split(parts[1], ";")
 
 			if len(enumValues) < 2 {
 				panic(validation.GetInvalidValidatorFormatMessage(fieldType.Name))
