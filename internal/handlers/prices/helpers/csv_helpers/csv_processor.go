@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// обработка csv-файла с ценами
 func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPricesResult, error) {
 	// лучше выполнять в одной транзакции
 	// если что - откат
@@ -38,12 +39,13 @@ func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPrices
 		return nil, fmt.Errorf("failed to read CSV header: %v", err)
 	}
 
-	seenIDs := make(map[int]bool)
-	var batch [][]string
-
 	// обработка по пачке
 	for {
-		batch, err = readCSVBatch(csvReader, batchSize)
+		// дубликаты ID в пачке
+		seenIDs := make(map[int]bool)
+
+		// получение пачки
+		batch, err := readCSVBatch(csvReader, batchSize)
 		// завершаем, если ошибка или пачка закончилась
 		if err != nil && err != io.EOF {
 			tx.Rollback()
@@ -55,7 +57,7 @@ func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPrices
 
 		result.TotalCount += len(batch)
 
-		// обработка пачки
+		// обработка пачки, валидация данных
 		batchResult, err := processBatch(tx, batch, seenIDs)
 		if err != nil {
 			tx.Rollback()

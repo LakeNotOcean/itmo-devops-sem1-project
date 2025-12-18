@@ -45,6 +45,8 @@ func (h *PriceHandler) GetPrices(w http.ResponseWriter, r *http.Request) {
 	log.Printf("GetPrices params - Start: %s, End: %s, Min: %v, Max: %v\n",
 		params.Start, params.End, params.Min, params.Max)
 
+	// берем все записи согласно входным параметрам
+	// получение данных упрощено по сравнению с загрузкой - отсуствуют ограничения, возможно их стоит поставить на период
 	prices, err := databasehelpers.FetchPricesFromDB(h.db, params)
 	if err != nil {
 		log.Printf("Error: %v", err)

@@ -3,6 +3,7 @@ package csvhelpers
 import (
 	"fmt"
 	"sem1-final-project-hard-level/internal/database/models"
+	"sem1-final-project-hard-level/internal/handlers/prices/helpers"
 	"strconv"
 	"strings"
 	"time"
@@ -20,7 +21,7 @@ type batchResult struct {
 // валидация пачки записей
 func processBatch(tx *gorm.DB, batch [][]string, seenIDs map[int]bool) (*batchResult, error) {
 	result := &batchResult{}
-	// нужны для проверке в БД на дубликаты
+	// массив ID пачки для проверки в БД на дубликаты
 	var recordIDs []int
 	recordMap := make(map[int]*models.Prices)
 
@@ -32,7 +33,7 @@ func processBatch(tx *gorm.DB, batch [][]string, seenIDs map[int]bool) (*batchRe
 			continue
 		}
 
-		// дубликаты в файле
+		// дубликаты в пачке, пропускаем
 		if seenIDs[parsed.ID] {
 			result.duplicatesCount++
 			continue
@@ -49,8 +50,9 @@ func processBatch(tx *gorm.DB, batch [][]string, seenIDs map[int]bool) (*batchRe
 		return nil, err
 	}
 
-	// оставшиеся валидные записи собираем для вставки
+	// валидные записи собираем для вставки
 	for _, parsed := range recordMap {
+		// дубликаты в БД игнорируем
 		if existingIDs[parsed.ID] {
 			result.duplicatesCount++
 			continue
@@ -82,15 +84,15 @@ func parseAndValidateRecord(record []string) (*models.Prices, error) {
 		return nil, fmt.Errorf("invalid name")
 	}
 
-	// категория
+	// категорию
 	category := strings.TrimSpace(record[2])
 	if len(category) > 255 || category == "" {
 		return nil, fmt.Errorf("invalid category")
 	}
 
-	// цена - 2 знака после запятой
+	// цену
 	priceStr := strings.TrimSpace(record[3])
-	price, err := strconv.ParseFloat(priceStr, 64)
+	price, err := helpers.ParsePriceWithRegex(priceStr)
 	if err != nil {
 		return nil, err
 	}

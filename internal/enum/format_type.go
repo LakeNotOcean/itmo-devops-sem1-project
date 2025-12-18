@@ -2,6 +2,8 @@ package enum
 
 import "fmt"
 
+// тип формата файла-архива
+// строковый enum
 type FormatType string
 
 const (
