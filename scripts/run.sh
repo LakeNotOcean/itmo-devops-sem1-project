@@ -3,13 +3,13 @@
 set -e
 
 SCRIPT_DIR="$(dirname "$0")"
-STATE_FILE="$SCRIPT_DIR/.deploy_state"
+STATE_FILE="$SCRIPT_DIR/configs/.scripts_varaibles"
 
 echo "Starting full deployment process"
 echo "======================================"
 
 # Load configuration
-source "$SCRIPT_DIR/config.env"
+source "$SCRIPT_DIR/configs/.env"
 
 # Check dependencies
 if ! command -v yc &> /dev/null; then

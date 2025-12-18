@@ -11,8 +11,8 @@ import (
 	custommiddleware "sem1-final-project-hard-level/internal/custom_middlewares"
 	"sem1-final-project-hard-level/internal/database"
 	"sem1-final-project-hard-level/internal/dto"
-	archivehelpers "sem1-final-project-hard-level/internal/handlers/prices/archive_helpers"
-	databasehelpers "sem1-final-project-hard-level/internal/handlers/prices/database_helpers"
+	archivehelpers "sem1-final-project-hard-level/internal/handlers/prices/helpers/archive_helpers"
+	databasehelpers "sem1-final-project-hard-level/internal/handlers/prices/helpers/database_helpers"
 
 	"gorm.io/gorm"
 )

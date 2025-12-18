@@ -3,7 +3,7 @@ package prices
 import (
 	"fmt"
 	"sem1-final-project-hard-level/internal/dto"
-	archivehelpers "sem1-final-project-hard-level/internal/handlers/prices/archive_helpers"
+	archivehelpers "sem1-final-project-hard-level/internal/handlers/prices/helpers/archive_helpers"
 
 	"gorm.io/gorm"
 )

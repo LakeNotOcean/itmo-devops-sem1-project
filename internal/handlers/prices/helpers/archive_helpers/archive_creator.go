@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"sem1-final-project-hard-level/internal/database/models"
+	csvhelpers "sem1-final-project-hard-level/internal/handlers/prices/helpers/csv_helpers"
 	"sem1-final-project-hard-level/internal/validation"
 	"strconv"
 )
@@ -43,7 +44,7 @@ func createCSVData(prices []models.Prices) ([]byte, error) {
 	csvWriter := csv.NewWriter(csvBuffer)
 
 	// создаем заголовок
-	if err := csvWriter.Write([]string{"id", "name", "category", "price", "create_date"}); err != nil {
+	if err := csvWriter.Write(csvhelpers.CSVHeader); err != nil {
 		return nil, fmt.Errorf("failed to write CSV header: %v", err)
 	}
 
@@ -54,7 +55,7 @@ func createCSVData(prices []models.Prices) ([]byte, error) {
 			price.Name,
 			price.Category,
 			strconv.FormatFloat(price.Price, 'f', 2, 64),
-			price.CreatedAt.Format(validation.TIMEFORMAT),
+			price.CreateDate.Format(validation.TIMEFORMAT),
 		}
 		if err := csvWriter.Write(record); err != nil {
 			return nil, fmt.Errorf("failed to write CSV record: %v", err)

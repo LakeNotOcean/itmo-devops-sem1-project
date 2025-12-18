@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sem1-final-project-hard-level/internal/dto"
-	processhelpers "sem1-final-project-hard-level/internal/handlers/prices/process_helpers"
+	csvhelpers "sem1-final-project-hard-level/internal/handlers/prices/helpers/csv_helpers"
 	"strings"
 
 	"gorm.io/gorm"
@@ -38,7 +38,7 @@ func HandleTarFile(db *gorm.DB, filePath string, dataFileName string, batchSize 
 		if header.Typeflag == tar.TypeDir || !isCSVFile(header.Name) {
 			continue
 		}
-		return processhelpers.ProcessCSV(db, tarReader, batchSize)
+		return csvhelpers.ProcessCSV(db, tarReader, batchSize)
 	}
 
 	return nil, fmt.Errorf("%s not found in archive", dataFileName)
@@ -62,7 +62,7 @@ func HandleZipFile(db *gorm.DB, filePath string, dataFileName string, batchSize 
 		}
 		defer rc.Close()
 
-		return processhelpers.ProcessCSV(db, rc, batchSize)
+		return csvhelpers.ProcessCSV(db, rc, batchSize)
 	}
 
 	return nil, fmt.Errorf("%s not found in archive", dataFileName)

@@ -86,3 +86,4 @@ save_state() {
     # Add new entry
     echo "$key=\"$value\"" >> "$state_file"
 }
+

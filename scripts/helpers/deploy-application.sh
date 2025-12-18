@@ -10,7 +10,7 @@ fi
 
 VM_IP="$1"
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/config.env"
+source "$SCRIPT_DIR/configs/.env"
 
 echo "Deploying application to $VM_IP"
 

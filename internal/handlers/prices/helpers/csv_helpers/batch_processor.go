@@ -1,4 +1,4 @@
-package processhelpers
+package csvhelpers
 
 import (
 	"fmt"
@@ -102,11 +102,11 @@ func parseAndValidateRecord(record []string) (*models.Prices, error) {
 	}
 
 	return &models.Prices{
-		ID:        id,
-		CreatedAt: createdAt,
-		Name:      name,
-		Category:  category,
-		Price:     price,
+		ID:         id,
+		CreateDate: createdAt,
+		Name:       name,
+		Category:   category,
+		Price:      price,
 	}, nil
 }
 

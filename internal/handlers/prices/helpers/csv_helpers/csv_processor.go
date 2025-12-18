@@ -1,4 +1,4 @@
-package processhelpers
+package csvhelpers
 
 import (
 	"encoding/csv"
@@ -29,6 +29,8 @@ func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPrices
 	csvReader.Comma = ','
 	csvReader.FieldsPerRecord = -1
 
+	result := &dto.UploadPricesResult{}
+
 	// заголовок не интересен
 	_, err := csvReader.Read()
 	if err != nil {
@@ -36,7 +38,6 @@ func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPrices
 		return nil, fmt.Errorf("failed to read CSV header: %v", err)
 	}
 
-	result := &dto.UploadPricesResult{}
 	seenIDs := make(map[int]bool)
 	var batch [][]string
 

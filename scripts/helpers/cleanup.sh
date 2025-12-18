@@ -3,8 +3,8 @@
 set -e
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/config.env"
-STATE_FILE="$SCRIPT_DIR/.deploy_state"
+source "$SCRIPT_DIR/configs/.env"
+STATE_FILE="$SCRIPT_DIR/configs/.scripts_varaibles"
 
 echo "Cleaning up infrastructure"
 

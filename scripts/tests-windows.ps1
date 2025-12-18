@@ -103,7 +103,10 @@ function Check-ApiSimple {
     try {
         $response = Invoke-UploadRequest -Uri "${API_HOST}/api/v0/prices" -FilePath $TEST_ZIP
         
-        if ($response.total_items -and $response.total_categories -and $response.total_price) {
+        # Проверяем наличие всех трёх полей в ответе (аналогично bash)
+        if ($response.PSObject.Properties.Name -contains 'total_items' -and 
+            $response.PSObject.Properties.Name -contains 'total_categories' -and 
+            $response.PSObject.Properties.Name -contains 'total_price') {
             Write-Host "[OK] POST request successful" -ForegroundColor $GREEN
         }
         else {
@@ -165,7 +168,7 @@ function Check-ApiAdvanced {
     try {
         $response = Invoke-UploadRequest -Uri "${API_HOST}/api/v0/prices?type=zip" -FilePath $TEST_ZIP
         
-        if ($response.total_items) {
+        if ($response.PSObject.Properties.Name -contains 'total_items') {
             Write-Host "[OK] POST request with ZIP successful" -ForegroundColor $GREEN
         }
         else {
@@ -184,7 +187,7 @@ function Check-ApiAdvanced {
     try {
         $response = Invoke-UploadRequest -Uri "${API_HOST}/api/v0/prices?type=tar" -FilePath $TEST_TAR
         
-        if ($response.total_items) {
+        if ($response.PSObject.Properties.Name -contains 'total_items') {
             Write-Host "[OK] POST request with TAR successful" -ForegroundColor $GREEN
         }
         else {
@@ -211,12 +214,12 @@ function Check-ApiComplex {
     try {
         $response = Invoke-UploadRequest -Uri "${API_HOST}/api/v0/prices?type=zip" -FilePath $TEST_ZIP
         
-        # Check all required fields in response
+        # Check all required fields in response (теперь проверяем наличие через -contains)
         $required_fields = @("total_count", "duplicates_count", "total_items", "total_categories", "total_price")
         $missing_fields = @()
         
         foreach ($field in $required_fields) {
-            if (-not $response.PSObject.Properties[$field]) {
+            if (-not ($response.PSObject.Properties.Name -contains $field)) {
                 $missing_fields += $field
             }
         }
@@ -229,7 +232,7 @@ function Check-ApiComplex {
             return $false
         }
         
-        # Check correct handling of invalid data
+        # Check correct handling of invalid data (эти проверки оставляем как есть, т.к. они работают с числовыми значениями)
         if ($response.total_count -gt $response.total_items) {
             Write-Host "[OK] Invalid data correctly filtered (total_count > total_items)" -ForegroundColor $GREEN
         }
@@ -238,7 +241,7 @@ function Check-ApiComplex {
             return $false
         }
         
-        # Check duplicate handling
+        # Check duplicate handling (эта проверка оставлена как есть, т.к. работает с числом)
         if ($response.duplicates_count -gt 0) {
             Write-Host "[OK] Duplicates successfully detected" -ForegroundColor $GREEN
         }
@@ -400,7 +403,9 @@ function Check-Postgres {
                 SELECT * FROM stats;
 "@
                 $env:PGPASSWORD = $DB_PASSWORD
-                $result = & psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c $query 2>$null
+                # Убираем перенаправление stderr в $null, чтобы видеть ошибки
+                $result = & psql -h $DB_HOST -U $DB_USER -d $DB_NAME -c $query 2>&1
+        
                 
                 if ($LASTEXITCODE -eq 0) {
                     Write-Host "[OK] PostgreSQL working correctly" -ForegroundColor $GREEN

@@ -28,7 +28,7 @@ func buildQuery(db *gorm.DB, params *dto.GetPricesQueryParamsDto) *gorm.DB {
 	if params.Start != "" {
 		startTime, err := time.Parse(validation.TIMEFORMAT, params.Start)
 		if err == nil {
-			query = query.Where("created_at >= ?", startTime)
+			query = query.Where("create_date >= ?", startTime)
 		}
 	}
 
@@ -36,7 +36,7 @@ func buildQuery(db *gorm.DB, params *dto.GetPricesQueryParamsDto) *gorm.DB {
 	if params.End != "" {
 		endTime, err := time.Parse(validation.TIMEFORMAT, params.End)
 		if err == nil {
-			query = query.Where("created_at <= ?", endTime)
+			query = query.Where("create_date <= ?", endTime)
 		}
 	}
 

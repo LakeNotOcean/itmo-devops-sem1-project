@@ -4,6 +4,7 @@ vendor
 # Environment-specific configuration files (if not managed by other means)
 *.env
 .env.*
+.deploy_config
 
 # Build cache and module cache
 .go/
