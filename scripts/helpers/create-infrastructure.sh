@@ -8,22 +8,21 @@ STATE_FILE="$SCRIPT_DIR/configs/.scripts_varaibles"
 
 echo "Creating infrastructure..."
 
-# Check SSH key
+# ssh key check
 if [ ! -f "$SSH_KEY_PUB" ]; then
     echo "Error: SSH key not found"
     exit 1
 fi
 
-# Check existing VM
 echo "Checking for existing VM..."
 EXISTING_VM=$(yc compute instance list --folder-id="$YC_FOLDER_ID" --format=json | jq -r --arg vm_name "$VM_NAME" '.[] | select(.name==$vm_name) | .id')
 
+# we won't create an VM if it already exists   
 if [ "$EXISTING_VM" ]; then
     echo "VN exists already!"
     exit 0
 fi
 
-# Create network
 echo "Creating network..."
 NETWORK_ID=$(yc vpc network list --folder-id="$YC_FOLDER_ID" --format=json | jq -r --arg network_name "$NETWORK_NAME" '.[] | select(.name==$network_name) | .id')
 if [ -z "$NETWORK_ID" ]; then

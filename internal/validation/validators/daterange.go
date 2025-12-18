@@ -1,6 +1,7 @@
-package validation
+package validations
 
 import (
+	"sem1-final-project-hard-level/internal/validation/registry"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -42,5 +43,5 @@ func (DateRangeValidator) Validate(fl validator.FieldLevel) bool {
 
 // автоматическая регистрация валидатора при импорте
 func init() {
-	Register(DateRangeValidator{})
+	registry.Register(DateRangeValidator{})
 }

@@ -1,8 +1,8 @@
-// validation/enum_with_default.go
-package validation
+package enum
 
 import (
 	"fmt"
+	"sem1-final-project-hard-level/internal/validation/registry"
 	"slices"
 	"strings"
 
@@ -17,7 +17,7 @@ const (
 	ENUM_VALIDATOR = "enum_value"
 )
 
-func GetInvalidValidatorFormatMessage(fieldName string) string {
+func getInvalidValidatorFormatMessage(fieldName string) string {
 	return fmt.Sprintf("Must be in the format enum_value=default_value|value1|value2 for field \"%s\"", fieldName)
 }
 
@@ -37,7 +37,7 @@ func (EnumValidator) Validate(fl validator.FieldLevel) bool {
 
 	parts := strings.Split(params, ";")
 	if len(parts) < 2 {
-		panic(GetInvalidValidatorFormatMessage(fl.FieldName()))
+		panic(getInvalidValidatorFormatMessage(fl.FieldName()))
 	}
 
 	allowedValues := parts[1:]
@@ -49,5 +49,5 @@ func (EnumValidator) Validate(fl validator.FieldLevel) bool {
 
 // автоматическая регистрация валидатора при импорте
 func init() {
-	Register(EnumValidator{})
+	registry.Register(EnumValidator{})
 }

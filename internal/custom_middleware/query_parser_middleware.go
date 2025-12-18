@@ -21,6 +21,7 @@ type QueryParserConfig struct {
 	Decoder   *form.Decoder
 }
 
+// парсинг и валидация query-параметров запроса
 func QueryParserMiddleware[T any](config *QueryParserConfig) func(http.Handler) http.Handler {
 	if config == nil {
 		config = &QueryParserConfig{
@@ -29,19 +30,23 @@ func QueryParserMiddleware[T any](config *QueryParserConfig) func(http.Handler) 
 		}
 	}
 
+	// кастомные валидаторы из пакета validation
 	validation.RegisterCustomValidators(config.Validator)
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var params T
 
+			// сначала парсим
 			if err := config.Decoder.Decode(&params, r.URL.Query()); err != nil {
 				http.Error(w, "Invalid query parameters", http.StatusBadRequest)
 				return
 			}
 
-			SetEnumDefaults(&params)
+			// затем ставим значения по умолчанию
+			validation.SetDefaults(&params)
 
+			// в конце валидируем итог
 			if err := config.Validator.Struct(params); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return

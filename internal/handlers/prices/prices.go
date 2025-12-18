@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"sem1-final-project-hard-level/internal/config"
-	custommiddleware "sem1-final-project-hard-level/internal/custom_middlewares"
+	custommiddleware "sem1-final-project-hard-level/internal/custom_middleware"
 	"sem1-final-project-hard-level/internal/database"
 	"sem1-final-project-hard-level/internal/dto"
 	archivehelpers "sem1-final-project-hard-level/internal/handlers/prices/helpers/archive_helpers"

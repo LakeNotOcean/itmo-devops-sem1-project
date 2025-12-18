@@ -1,10 +1,12 @@
-package validation
+package validations
 
 import (
+	"sem1-final-project-hard-level/internal/validation/registry"
+
 	"github.com/go-playground/validator/v10"
 )
 
-// Валидатор работает с указателями *int
+// валидатор работает с указателями *int
 type MinMaxValidator struct{}
 
 const (
@@ -44,5 +46,5 @@ func (MinMaxValidator) Validate(fl validator.FieldLevel) bool {
 
 // автоматическая регистрация валидатора при импорте
 func init() {
-	Register(MinMaxValidator{})
+	registry.Register(MinMaxValidator{})
 }
