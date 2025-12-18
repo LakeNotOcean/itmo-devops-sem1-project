@@ -87,3 +87,17 @@ save_state() {
     echo "$key=\"$value\"" >> "$state_file"
 }
 
+# change or add varaible
+# update_env_var "$FILE_NAME" "VAR" "$VAR"
+update_env_var() {
+    local file_name="$1"
+    local key="$2"
+    local value="$3"
+    
+    if grep -q "^$key=" "$file_name"; then
+        sed -i "s/^$key=.*/$key=$value/" "$file_name"
+    else
+        echo "$key=$value" >> "$file_name"
+    fi
+}
+

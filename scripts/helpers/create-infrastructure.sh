@@ -4,7 +4,7 @@ set -e
 
 SCRIPT_DIR="$(dirname "$0")"
 source "$SCRIPT_DIR/configs/.env"
-STATE_FILE="$SCRIPT_DIR/configs/.scripts_varaibles"
+source "$SCRIPT_DIR/utils.sh"
 
 echo "Creating infrastructure..."
 
@@ -35,7 +35,6 @@ else
     echo "Using existing network: $NETWORK_ID"
 fi
 
-# Create subnet
 echo "Creating subnet..."
 SUBNET_ID=$(yc vpc subnet list --folder-id="$YC_FOLDER_ID" --format=json | jq -r --arg subnet_name "$SUBNET_NAME" '.[] | select(.name==$subnet_name) | .id')
 if [ -z "$SUBNET_ID" ]; then
@@ -51,7 +50,6 @@ else
     echo "Using existing subnet: $SUBNET_ID"
 fi
 
-# Prepare cloud-config
 echo "Preparing configuration..."
 SSH_KEY_CONTENT=$(cat "$SSH_KEY_PUB")
 CLOUD_CONFIG=$(cat <<EOF
@@ -69,7 +67,7 @@ EOF
 CLOUD_CONFIG_FILE=$(mktemp)
 echo "$CLOUD_CONFIG" > "$CLOUD_CONFIG_FILE"
 
-# Create VM
+
 echo "Creating virtual machine..."
 PREEMPTIBLE_ARG=""
 [ "$USE_PREEMPTIBLE" = "true" ] && PREEMPTIBLE_ARG="--preemptible"
@@ -91,7 +89,6 @@ VM_ID=$(yc compute instance create \
 rm -f "$CLOUD_CONFIG_FILE"
 echo "VM created: $VM_ID"
 
-# Wait for IP address
 echo "Waiting for IP address..."
 sleep 20
 
@@ -103,23 +100,43 @@ fi
 
 echo "VM IP: $VM_IP"
 
-# Wait for SSH
 echo "Waiting for SSH availability..."
-for i in {1..20}; do
-    if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 -o BatchMode=yes ubuntu@"$VM_IP" "echo OK" &>/dev/null; then
-        echo "SSH is available"
+DELAY=20
+ATTEMPTS=50
+for ((i=1; i<=$ATTEMPTS; i++)); do
+    echo "  Attempt $i/100..."
+    
+    if ssh -o StrictHostKeyChecking=no \
+           -o ConnectTimeout=5 \
+           -o BatchMode=yes \
+           -o PasswordAuthentication=no \
+           -o UserKnownHostsFile=/dev/null \
+           "$SSH_USER@$VM_IP" "echo OK" &>/dev/null; then
+        echo "SSH is available!"
         break
     fi
-    echo "  Attempt $i/20..."
-    sleep 10
+    
+    if [[ $i -eq $MAX_ATTEMPTS ]]; then
+        echo "SSH is not available"
+        exit 1
+    fi
+    
+    echo "Waiting $DELAY seconds..."
+    sleep $DELAY
 done
 
-# Save state
-cat > "$STATE_FILE" << EOF
-VM_ID="$VM_ID"
-VM_IP="$VM_IP"
-NETWORK_ID="$NETWORK_ID"
-SUBNET_ID="$SUBNET_ID"
-EOF
+# update env
+declare -A config=(
+    ["VM_ID"]="$VM_ID"
+    ["VM_IP"]="$VM_IP"
+    ["NETWORK_ID"]="$NETWORK_ID"
+    ["SUBNET_ID"]="$SUBNET_ID"
+)
+
+for key in "${!config[@]}"; do
+    value="${config[$key]}"
+    update_env_var "$FILE_NAME" "$key" "$value"
+done
+
 
 echo "Infrastructure created successfully!" 
