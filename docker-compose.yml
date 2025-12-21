@@ -6,9 +6,9 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
-      -  "5432:5432"
+      -  "${DB_PORT}:${DB_PORT}"
     restart: always
-    env_file:
+    env_file:   
       - configs/.env
     networks:
       - project_sem_1_network
@@ -16,6 +16,8 @@ services:
     image: ${DOCKER_IMAGE_NAME}
     container_name: backend
     restart: always
+    ports:
+      - "${PORT}:${PORT}"
     env_file:
       - configs/.env
     depends_on:

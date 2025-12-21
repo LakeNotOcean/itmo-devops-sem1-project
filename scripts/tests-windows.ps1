@@ -13,20 +13,30 @@ $DB_NAME = "project-sem-1"
 $DB_USER = "validator"
 $DB_PASSWORD = "val1dat0r"
 
-# Temporary files for testing
-$TEST_ZIP = "test_data.zip"
-$TEST_TAR = "test_data.tar"
-$TEST_CSV = "test_data.csv"
-$RESPONSE_ZIP = "response.zip"
+# Получаем абсолютный путь к директории скрипта
+$SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
+
+# Temporary files for testing (используем абсолютные пути)
+$TEST_CSV = Join-Path $SCRIPT_DIR "test_data.csv"
+$TEST_ZIP = Join-Path $SCRIPT_DIR "test_data.zip"
+$TEST_TAR = Join-Path $SCRIPT_DIR "test_data.tar"
+$RESPONSE_ZIP = Join-Path $SCRIPT_DIR "response.zip"
 
 function Create-TestFiles {
     param(
         [int]$Level
     )
     
-    if ($Level -eq 3) {
-        # Create test CSV file with invalid data for complex level
-        @"
+    # Сохраняем текущую директорию
+    $currentDir = Get-Location
+    
+    try {
+        # Переходим в директорию скрипта для создания файлов
+        Set-Location $SCRIPT_DIR
+        
+        if ($Level -eq 3) {
+            # Create test CSV file with invalid data for complex level
+            @"
 id,name,category,price,create_date
 1,item1,cat1,100,2024-01-01
 2,item2,cat2,200,2024-01-15
@@ -36,21 +46,38 @@ id,name,category,price,create_date
 6,item6,cat6,600,invalid_date
 1,item1,cat1,100,2024-01-01
 "@ | Out-File -FilePath $TEST_CSV -Encoding UTF8
-        
-        Compress-Archive -Path $TEST_CSV -DestinationPath $TEST_ZIP -Force
-        & tar -cf $TEST_TAR $TEST_CSV
-    }
-    else {
-        # Create test CSV file with valid data for simple and advanced levels
-        @"
+            
+            if (Test-Path $TEST_ZIP) { Remove-Item $TEST_ZIP -Force }
+            if (Test-Path $TEST_TAR) { Remove-Item $TEST_TAR -Force }
+            
+            Compress-Archive -Path $TEST_CSV -DestinationPath $TEST_ZIP -Force
+            
+            # Используем полный путь для tar
+            $csvFileName = Split-Path $TEST_CSV -Leaf
+            & tar -cf $TEST_TAR -C $SCRIPT_DIR $csvFileName
+        }
+        else {
+            # Create test CSV file with valid data for simple and advanced levels
+            @"
 id,name,category,price,create_date
 1,item1,cat1,100,2024-01-01
 2,item2,cat2,200,2024-01-15
 3,item3,cat3,300,2024-01-20
 "@ | Out-File -FilePath $TEST_CSV -Encoding UTF8
-        
-        Compress-Archive -Path $TEST_CSV -DestinationPath $TEST_ZIP -Force
-        & tar -cf $TEST_TAR $TEST_CSV
+            
+            if (Test-Path $TEST_ZIP) { Remove-Item $TEST_ZIP -Force }
+            if (Test-Path $TEST_TAR) { Remove-Item $TEST_TAR -Force }
+            
+            Compress-Archive -Path $TEST_CSV -DestinationPath $TEST_ZIP -Force
+            
+            # Используем полный путь для tar
+            $csvFileName = Split-Path $TEST_CSV -Leaf
+            & tar -cf $TEST_TAR -C $SCRIPT_DIR $csvFileName
+        }
+    }
+    finally {
+        # Возвращаемся в исходную директорию
+        Set-Location $currentDir
     }
 }
 
@@ -60,6 +87,12 @@ function Invoke-UploadRequest {
         [string]$FilePath,
         [string]$FormFieldName = "file"
     )
+    
+    # Проверяем существование файла
+    if (-not (Test-Path $FilePath)) {
+        Write-Host "[FAIL] File not found: $FilePath" -ForegroundColor $RED
+        throw "File not found: $FilePath"
+    }
     
     # Create multipart/form-data manually for PowerShell 5.1 compatibility
     $boundary = [System.Guid]::NewGuid().ToString()
@@ -430,7 +463,13 @@ function Check-Postgres {
 }
 
 function Cleanup {
-    Remove-Item -Path $TEST_CSV, $TEST_ZIP, $TEST_TAR, $RESPONSE_ZIP -ErrorAction SilentlyContinue
+    # Удаляем временные файлы в директории скрипта
+    $files = @($TEST_CSV, $TEST_ZIP, $TEST_TAR, $RESPONSE_ZIP)
+    foreach ($file in $files) {
+        if (Test-Path $file) {
+            Remove-Item -Path $file -ErrorAction SilentlyContinue
+        }
+    }
 }
 
 function Main {

@@ -2,6 +2,7 @@ package csvhelpers
 
 import (
 	"fmt"
+	"log"
 	"sem1-final-project-hard-level/internal/database/models"
 	"sem1-final-project-hard-level/internal/handlers/prices/helpers"
 	"strconv"
@@ -28,6 +29,7 @@ func processBatch(tx *gorm.DB, batch [][]string, seenIDs map[int]bool) (*batchRe
 	// парсим записи и собираем ID для проверки дубликатов по ID в БД
 	for _, record := range batch {
 		parsed, err := parseAndValidateRecord(record)
+		log.Println("Parsed: ", parsed)
 		// если данные неполные, то просто игнорируем
 		if err != nil {
 			continue
@@ -81,13 +83,13 @@ func parseAndValidateRecord(record []string) (*models.Prices, error) {
 	// имя
 	name := strings.TrimSpace(record[1])
 	if len(name) > 255 || name == "" {
-		return nil, fmt.Errorf("invalid name")
+		return nil, fmt.Errorf("invalid name: %v", name)
 	}
 
 	// категорию
 	category := strings.TrimSpace(record[2])
 	if len(category) > 255 || category == "" {
-		return nil, fmt.Errorf("invalid category")
+		return nil, fmt.Errorf("invalid category: %v", category)
 	}
 
 	// цену
@@ -112,7 +114,7 @@ func parseAndValidateRecord(record []string) (*models.Prices, error) {
 	}, nil
 }
 
-// получение ID в БД
+// получение ID из БД
 func getExistingIDs(tx *gorm.DB, ids []int) (map[int]bool, error) {
 	existingIDs := make(map[int]bool)
 
@@ -122,6 +124,7 @@ func getExistingIDs(tx *gorm.DB, ids []int) (map[int]bool, error) {
 
 	// ID из БД
 	var existing []int
+
 	if err := tx.Model(&models.Prices{}).
 		Where("id IN ?", ids).
 		Pluck("id", &existing).Error; err != nil {

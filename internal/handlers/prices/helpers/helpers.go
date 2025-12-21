@@ -13,7 +13,7 @@ var re = regexp.MustCompile(`^-?\d+(?:[.]\d{1,2})?$`)
 func ParsePriceWithRegex(priceStr string) (float64, error) {
 	priceStr = strings.TrimSpace(priceStr)
 
-	if re.MatchString(priceStr) {
+	if !re.MatchString(priceStr) {
 		return 0, fmt.Errorf("invalid price format: %s", priceStr)
 	}
 

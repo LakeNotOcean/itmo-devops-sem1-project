@@ -5,10 +5,12 @@ vendor
 *.env
 .env.*
 .deploy_config
+keys
 
 # Build cache and module cache
 .go/
 .cache/
+deploy.tar.gz
 
 # Editor/IDE specific files
 build

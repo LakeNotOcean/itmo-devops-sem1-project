@@ -3,7 +3,8 @@
 set -e
 
 SCRIPT_DIR="$(dirname "$0")"
-source "$SCRIPT_DIR/configs/.env"
+ENV_FILE_PATH="$SCRIPT_DIR/../../configs/.env"
+source "$ENV_FILE_PATH"
 source "$SCRIPT_DIR/utils.sh"
 
 echo "Creating infrastructure..."
@@ -30,6 +31,10 @@ if [ -z "$NETWORK_ID" ]; then
         --name="$NETWORK_NAME" \
         --folder-id="$YC_FOLDER_ID" \
         --format=json | jq -r '.id')
+    if [ -z "$NETWORK_ID" ] || [ "$NETWORK_ID" = "null" ]; then
+        echo "Error: Failed to create network"
+        exit 1
+    fi
     echo "Network created: $NETWORK_ID"
 else
     echo "Using existing network: $NETWORK_ID"
@@ -45,6 +50,10 @@ if [ -z "$SUBNET_ID" ]; then
         --zone="$YC_ZONE" \
         --range="$SUBNET_CIDR" \
         --format=json | jq -r '.id')
+    if [ -z "$SUBNET_ID" ] || [ "$SUBNET_ID" = "null" ]; then
+        echo "Error: Failed to create subnet"
+        exit 1
+    fi
     echo "Subnet created: $SUBNET_ID"
 else
     echo "Using existing subnet: $SUBNET_ID"
@@ -52,10 +61,11 @@ fi
 
 echo "Preparing configuration..."
 SSH_KEY_CONTENT=$(cat "$SSH_KEY_PUB")
+
 CLOUD_CONFIG=$(cat <<EOF
 #cloud-config
 users:
-  - name: ubuntu
+  - name: $SSH_USER
     groups: sudo
     shell: /bin/bash
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
@@ -79,6 +89,7 @@ VM_ID=$(yc compute instance create \
     --platform="$PLATFORM_ID" \
     --cores="$VM_CORES" \
     --memory="${VM_MEMORY}GB" \
+    --core-fraction=$CORE_FRACTION \
     --create-boot-disk size="${VM_DISK_SIZE}GB",image-id="$VM_IMAGE",type="network-hdd" \
     --network-interface subnet-id="$SUBNET_ID",nat-ip-version=ipv4 \
     --metadata-from-file user-data="$CLOUD_CONFIG_FILE" \
@@ -87,6 +98,11 @@ VM_ID=$(yc compute instance create \
     --format=json | jq -r '.id')
 
 rm -f "$CLOUD_CONFIG_FILE"
+
+if [ -z "$VM_ID" ] || [ "$VM_ID" = "null" ]; then
+    echo "Error: Failed to create VM"
+    exit 1
+fi
 echo "VM created: $VM_ID"
 
 echo "Waiting for IP address..."
@@ -100,8 +116,10 @@ fi
 
 echo "VM IP: $VM_IP"
 
+set +e
 # check SSH connection
 check_ssh $SSH_USER $VM_IP
+set -e
 
 # update env
 declare -A config=(
@@ -113,7 +131,7 @@ declare -A config=(
 
 for key in "${!config[@]}"; do
     value="${config[$key]}"
-    update_env_var "$FILE_NAME" "$key" "$value"
+    update_env_var "$ENV_FILE_PATH" "$key" "$value"
 done
 
 

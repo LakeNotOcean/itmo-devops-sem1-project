@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [ main, master ]
 
+# Прежде всего тестируем локально, если тесты прошли - разворачиваем на удаленном сервере
+
+# TODO
+# Локальную сбору golang сервисов
+# Запуск локальных тестов 1,2,3
+# Запуск run.sh
 jobs:
   test:
     name: Run Tests
@@ -20,7 +26,6 @@ jobs:
           POSTGRES_PASSWORD: val1dat0r
         ports:
           - 5432:5432
-        # Добавляем volume для сохранения данных
         volumes:
           - postgres_data:/var/lib/postgresql/data
         options: >-
@@ -30,31 +35,44 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.23'
+        go-version: '1.25'
 
     - name: Make scripts executable
       run: |
-        chmod +x scripts/prepare.sh
-        chmod +x scripts/run.sh
         chmod +x scripts/tests.sh
 
-    - name: Prepare environment
-      run: ./scripts/prepare.sh
+    - name: Create .env for tests
+      run: |
+        mkdir -p ./configs
+        cat > ./configs/.env << EOF
+        # Backend
+        PORT=${{ 8080 }}
+        IDLE_TIMEOUT=${{ secrets.IDLE_TIMEOUT }}
+        MAX_FILE_SIZE=${{ secrets.MAX_FILE_SIZE }}
+        TEMP_FILE_DIR=${{ secrets.TEMP_FILE_DIR }}
+        DATA_FILE_NAME=${{ secrets.DATA_FILE_NAME }}
+        BATCH_SIZE=${{ secrets.BATCH_SIZE }}
+        # Database
+        POSTGRES_HOST=localhost
+        POSTGRES_PORT=5432
+        POSTGRES_DB=project-sem-1
+        POSTGRES_USER=validator
+        POSTGRES_PASSWORD=val1dat0r
+        EOF
 
-    - name: Run application
-      run: ./scripts/run.sh
-      env:
-        POSTGRES_HOST: localhost
-        POSTGRES_PORT: 5432
-        POSTGRES_DB: project-sem-1
-        POSTGRES_USER: validator
-        POSTGRES_PASSWORD: val1dat0r
-
+    - name: Run Go application for tests
+      working-directory: ./cmd/app/sem1-final-project-hard-level
+      run: |
+        go build -o app
+        ./app &
+        APP_PID=$!
+        echo "Application started with PID: $APP_PID"
+        sleep 10
     - name: Test Level 1
       id: test-level-1
       continue-on-error: true
@@ -100,3 +118,69 @@ jobs:
           echo "All test levels failed!"
           exit 1
         fi
+
+  deploy:
+    name: Deploy to Remote Server
+    runs-on: ubuntu-latest
+    needs: test
+    if: success() 
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Create full .env for deploy
+      run: |
+        mkdir -p ./configs
+        cat > ./configs/.env << EOF
+        # Backend
+        PORT=${{ secrets.PORT }}
+        IDLE_TIMEOUT=${{ secrets.IDLE_TIMEOUT }}
+        MAX_FILE_SIZE=${{ secrets.MAX_FILE_SIZE }}
+        TEMP_FILE_DIR=${{ secrets.TEMP_FILE_DIR }}
+        DATA_FILE_NAME=${{ secrets.DATA_FILE_NAME }}
+        BATCH_SIZE=${{ secrets.BATCH_SIZE }}
+        
+        # Database
+        POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+        POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+        DB_HOST=${{ secrets.DB_HOST }}
+        DB_PORT=${{ secrets.DB_PORT }}
+        
+        # Docker
+        DOCKER_IMAGE_NAME=${{ secrets.DOCKER_IMAGE_NAME }}
+        
+        # Deploy
+        VM_IP=${{ secrets.VM_IP }}
+        SSH_USER=${{ secrets.SSH_USER }}
+        SSH_KEY_PRIVATE="${{ secrets.SSH_KEY_PRIVATE }}"
+        REMOTE_DIR=${{ secrets.REMOTE_DIR }}
+        YC_FOLDER_ID=${{ secrets.YC_FOLDER_ID }}
+        VM_NAME=${{ secrets.VM_NAME }}
+        NETWORK_NAME=${{ secrets.NETWORK_NAME }}
+        SUBNET_NAME=${{ secrets.SUBNET_NAME }}
+        YC_ZONE=${{ secrets.YC_ZONE }}
+        SUBNET_CIDR=${{ secrets.SUBNET_CIDR }}
+        USE_PREEMPTIBLE=${{ secrets.USE_PREEMPTIBLE }}
+        PLATFORM_ID=${{ secrets.PLATFORM_ID }}
+        VM_CORES=${{ secrets.VM_CORES }}
+        VM_MEMORY=${{ secrets.VM_MEMORY }}
+        CORE_FRACTION=${{ secrets.CORE_FRACTION }}
+        VM_DISK_SIZE=${{ secrets.VM_DISK_SIZE }}
+        VM_IMAGE=${{ secrets.VM_IMAGE }}
+        SSH_KEY_PUB="${{ secrets.SSH_KEY_PUB }}"
+        EOF
+
+    - name: Make scripts executable
+      run: |
+        chmod +x scripts/helpers/create-infrastructure.sh
+        chmod +x scripts/helpers/deploy-application.sh
+        chmod +x scripts/helpers/install-dependencies.sh
+        chmod +x scripts/prepare.sh
+        chmod +x scripts/run.sh
+        chmod +x scripts/tests.sh
+
+    - name: Run deploy script
+      run: ./scripts/run.sh
+
+
