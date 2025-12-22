@@ -68,6 +68,7 @@ jobs:
     - name: Run Go application for tests
       run: |
         go build -o app ./cmd/app/sem1-final-project-hard-level
+        ./app &
         APP_PID=$!
         echo "Application started with PID: $APP_PID"
         sleep 10
