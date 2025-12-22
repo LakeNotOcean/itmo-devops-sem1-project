@@ -169,7 +169,7 @@ jobs:
     - name: Create SSH keys directory and files
       env:
         PRIVATE_KEY_CONTENT: ${{ secrets.SSH_PRIVATE_KEY_CONTENT }}
-          : ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}
+        PUBLIC_KEY_CONTENT: ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}
         PRIVATE_KEY_PATH: ${{ secrets.SSH_KEY_PRIVATE_PATH }}
         PUBLIC_KEY_PATH: ${{ secrets.SSH_KEY_PUB_PATH }}
       run: |
