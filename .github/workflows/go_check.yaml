@@ -7,11 +7,6 @@ on:
     branches: [ main, master ]
 
 # Прежде всего тестируем локально, если тесты прошли - разворачиваем на удаленном сервере
-
-# TODO
-# Локальную сбору golang сервисов
-# Запуск локальных тестов 1,2,3
-# Запуск run.sh
 jobs:
   test:
     name: Run Tests
@@ -117,7 +112,8 @@ jobs:
           echo "All test levels failed!"
           exit 1
         fi
-
+  # Деплой осуществляется командой ./run.sh, не уверен, что имеет смысл делать отдельные actions с повторением логики
+  # Инфраструктура и зависимости не переустанавливаются при их наличии
   deploy:
     name: Deploy to Remote Server
     runs-on: ubuntu-latest
