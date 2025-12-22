@@ -123,6 +123,27 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install Deploy Dependecies
+      run: |
+        curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+        sudo apt install jq
+
+    - name: Configure Yandex Cloud CLI
+      env:
+        YC_TOKEN: ${{ secrets.YC_TOKEN }}
+        YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+        YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+      run: |
+        yc config set token $YC_TOKEN
+        
+        if [ -n "$YC_CLOUD_ID" ]; then
+          yc config set cloud-id $YC_CLOUD_ID
+        fi
+        
+        if [ -n "$YC_FOLDER_ID" ]; then
+          yc config set folder-id $YC_FOLDER_ID
+        fi
+        
     - name: Create full .env for deploy
       run: |
         mkdir -p ./configs
