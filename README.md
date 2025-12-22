@@ -78,9 +78,12 @@ scripts/run.sh
 ## Тестирование
 
     ./scripts/tests.sh 1
+    ![alt text](./docs/images/test-1.png)
     ./scripts/tests.sh 2
+    ![alt text](./docs/images/test-2.png)
     ./scripts/tests.sh 3
-    
+    ![alt text](./docs/images/test-3.png)
+
 ## Контакт
 
 Telegram: @cheshirskins

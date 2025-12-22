@@ -170,10 +170,10 @@ jobs:
       env:
         PRIVATE_KEY_CONTENT: ${{ secrets.SSH_PRIVATE_KEY_CONTENT }}
         PUBLIC_KEY_CONTENT: ${{ secrets.SSH_PUBLIC_KEY_CONTENT }}
-        PRIVATE_KEY_PATH: ${{ secrets.SSH_KEY_PRIVATE_PATH }}
-        PUBLIC_KEY_PATH: ${{ secrets.SSH_KEY_PUB_PATH }}
+        PRIVATE_KEY_PATH: ${{ secrets.SSH_KEY_PRIVATE }}
+        PUBLIC_KEY_PATH: ${{ secrets.SSH_KEY_PUB }}
       run: |
-        mkdir -p $(dirname "$PRIVATE_KEY_PATH")
+        mkdir -p $(dirname "$PRIVATE_KEY")
         echo "$PRIVATE_KEY_CONTENT" > "$PRIVATE_KEY_PATH"
         echo "$PUBLIC_KEY_CONTENT" > "$PUBLIC_KEY_PATH"
         chmod 600 "$PRIVATE_KEY_PATH"
