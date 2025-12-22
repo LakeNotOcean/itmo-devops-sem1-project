@@ -66,7 +66,6 @@ jobs:
         EOF
 
     - name: Run Go application for tests
-      working-directory: ./cmd/app/sem1-final-project-hard-level
       run: |
         go build -o app ./cmd/app/sem1-final-project-hard-level
         APP_PID=$!
