@@ -126,7 +126,8 @@ jobs:
     - name: Install Deploy Dependecies
       run: |
         curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
-        sudo apt install jq
+        sudo apt install -y jq
+        echo "$HOME/yandex-cloud/bin" >> $GITHUB_PATH
 
     - name: Configure Yandex Cloud CLI
       env:
