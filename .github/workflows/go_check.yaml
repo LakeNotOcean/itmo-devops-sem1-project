@@ -51,7 +51,7 @@ jobs:
         mkdir -p ./configs
         cat > ./configs/.env << EOF
         # Backend
-        PORT=${{ 8080 }}
+        PORT=8080
         IDLE_TIMEOUT=${{ secrets.IDLE_TIMEOUT }}
         MAX_FILE_SIZE=${{ secrets.MAX_FILE_SIZE }}
         TEMP_FILE_DIR=${{ secrets.TEMP_FILE_DIR }}
