@@ -77,15 +77,15 @@ scripts/run.sh
 ## Тестирование
 
     ./scripts/tests.sh 1
-    ![alt text](https://github.com/LakeNotOcean/itmo-devops-sem1-project/blob/main/docs/images/test-1.png)
+    ![alt text](docs/images/test-1.png)
     ./scripts/tests.sh 2
-    ![alt text](https://github.com/LakeNotOcean/itmo-devops-sem1-project/blob/main/docs/images/test-2.png)
+    ![alt text](docs/images/test-2.png)
     ./scripts/tests.sh 3
-    ![alt text](https://github.com/LakeNotOcean/itmo-devops-sem1-project/blob/main/docs/images/test-3.png)
+    ![alt text](docs/images/test-3.png)
     ./scripts/run.sh
-    ![alt text](https://github.com/LakeNotOcean/itmo-devops-sem1-project/blob/main/docs/images/run-sh.png)
+    ![alt text](docs/images/run-sh.png)
     GitHub Actions
-    ![alt text](https://github.com/LakeNotOcean/itmo-devops-sem1-project/blob/main/docs/images/ci-cd.png)
+    ![alt text](docs/images/ci-cd.png)
     
 
 ## Контакты

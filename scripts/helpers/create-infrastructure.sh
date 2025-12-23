@@ -84,10 +84,10 @@ CLOUD_CONFIG_FILE=$(mktemp)
 echo "$CLOUD_CONFIG" > "$CLOUD_CONFIG_FILE"
   
 echo "Checking for existing VM..."
-VM_IP=$(yc compute instance list --folder-id="$YC_FOLDER_ID" --format=json | jq -r --arg vm_name "$VM_NAME" '.[] | select(.name==$vm_name) | .id')
+VM_ID=$(yc compute instance list --folder-id="$YC_FOLDER_ID" --format=json | jq -r --arg vm_name "$VM_NAME" '.[] | select(.name==$vm_name) | .id')
 
 # we won't create an VM if it already exists   
-if [ "$VM_IP" ]; then
+if [ "$VM_ID" ]; then
     echo "VN exists already!"
 else
     echo "Creating virtual machine..."
@@ -120,13 +120,13 @@ else
 
     echo "Waiting for IP address..."
     sleep 20
+fi
 
-    VM_IP=$(yc compute instance get "$VM_ID" --folder-id="$YC_FOLDER_ID" --format=json | jq -r '.network_interfaces[0].primary_v4_address.one_to_one_nat.address')
+VM_IP=$(yc compute instance get "$VM_ID" --folder-id="$YC_FOLDER_ID" --format=json | jq -r '.network_interfaces[0].primary_v4_address.one_to_one_nat.address')
     if [ -z "$VM_IP" ] || [ "$VM_IP" = "null" ]; then
         echo "Error: Failed to get IP address"
         exit 1
     fi
-fi
 
 echo "VM IP: $VM_IP"
 
