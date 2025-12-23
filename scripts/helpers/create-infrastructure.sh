@@ -91,7 +91,6 @@ if [ "$VM_ID" ]; then
     echo "VN exists already!"
 else
     echo "Creating virtual machine..."
-    IF 
     PREEMPTIBLE_ARG=""
     [ "$USE_PREEMPTIBLE" = "true" ] && PREEMPTIBLE_ARG="--preemptible"
 
