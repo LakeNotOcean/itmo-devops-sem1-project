@@ -15,15 +15,6 @@ if [ ! -f "$SSH_KEY_PUB" ]; then
     exit 1
 fi
 
-echo "Checking for existing VM..."
-EXISTING_VM=$(yc compute instance list --folder-id="$YC_FOLDER_ID" --format=json | jq -r --arg vm_name "$VM_NAME" '.[] | select(.name==$vm_name) | .id')
-
-# we won't create an VM if it already exists   
-if [ "$EXISTING_VM" ]; then
-    echo "VN exists already!"
-    exit 0
-fi
-
 echo "Creating network..."
 NETWORK_ID=$(yc vpc network list --folder-id="$YC_FOLDER_ID" --format=json | jq -r --arg network_name "$NETWORK_NAME" '.[] | select(.name==$network_name) | .id')
 if [ -z "$NETWORK_ID" ]; then
@@ -71,47 +62,70 @@ users:
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
     ssh-authorized-keys:
       - $SSH_KEY_CONTENT
+write_files:
+  - path: /etc/ssh/sshd_config.d/99-custom.conf
+    content: |
+      PubkeyAuthentication yes
+      PasswordAuthentication no
+      AllowUsers $SSH_USER
+      PermitRootLogin no
+      X11Forwarding no
+      MaxAuthTries 3
+      ClientAliveInterval 300
+      ClientAliveCountMax 2
+
+runcmd:
+  - [systemctl, restart, ssh]
+  - [systemctl, enable, ssh]
 EOF
 )
 
 CLOUD_CONFIG_FILE=$(mktemp)
 echo "$CLOUD_CONFIG" > "$CLOUD_CONFIG_FILE"
+  
+echo "Checking for existing VM..."
+VM_IP=$(yc compute instance list --folder-id="$YC_FOLDER_ID" --format=json | jq -r --arg vm_name "$VM_NAME" '.[] | select(.name==$vm_name) | .id')
 
+# we won't create an VM if it already exists   
+if [ "$VM_IP" ]; then
+    echo "VN exists already!"
+else
+    echo "Creating virtual machine..."
+    IF 
+    PREEMPTIBLE_ARG=""
+    [ "$USE_PREEMPTIBLE" = "true" ] && PREEMPTIBLE_ARG="--preemptible"
 
-echo "Creating virtual machine..."
-PREEMPTIBLE_ARG=""
-[ "$USE_PREEMPTIBLE" = "true" ] && PREEMPTIBLE_ARG="--preemptible"
+    VM_ID=$(yc compute instance create \
+        --name="$VM_NAME" \
+        --folder-id="$YC_FOLDER_ID" \
+        --zone="$YC_ZONE" \
+        --platform="$PLATFORM_ID" \
+        --cores="$VM_CORES" \
+        --memory="${VM_MEMORY}GB" \
+        --core-fraction=$CORE_FRACTION \
+        --create-boot-disk size="${VM_DISK_SIZE}GB",image-id="$VM_IMAGE",type="network-hdd" \
+        --network-interface subnet-id="$SUBNET_ID",nat-ip-version=ipv4 \
+        --metadata-from-file user-data="$CLOUD_CONFIG_FILE" \
+        --metadata "enable-oslogin=true" \
+        $PREEMPTIBLE_ARG \
+        --format=json | jq -r '.id')
 
-VM_ID=$(yc compute instance create \
-    --name="$VM_NAME" \
-    --folder-id="$YC_FOLDER_ID" \
-    --zone="$YC_ZONE" \
-    --platform="$PLATFORM_ID" \
-    --cores="$VM_CORES" \
-    --memory="${VM_MEMORY}GB" \
-    --core-fraction=$CORE_FRACTION \
-    --create-boot-disk size="${VM_DISK_SIZE}GB",image-id="$VM_IMAGE",type="network-hdd" \
-    --network-interface subnet-id="$SUBNET_ID",nat-ip-version=ipv4 \
-    --metadata-from-file user-data="$CLOUD_CONFIG_FILE" \
-    --metadata "enable-oslogin=true" \
-    $PREEMPTIBLE_ARG \
-    --format=json | jq -r '.id')
+    rm -f "$CLOUD_CONFIG_FILE"
 
-rm -f "$CLOUD_CONFIG_FILE"
+    if [ -z "$VM_ID" ] || [ "$VM_ID" = "null" ]; then
+        echo "Error: Failed to create VM"
+        exit 1
+    fi
+    echo "VM created: $VM_ID"
 
-if [ -z "$VM_ID" ] || [ "$VM_ID" = "null" ]; then
-    echo "Error: Failed to create VM"
-    exit 1
-fi
-echo "VM created: $VM_ID"
+    echo "Waiting for IP address..."
+    sleep 20
 
-echo "Waiting for IP address..."
-sleep 20
-
-VM_IP=$(yc compute instance get "$VM_ID" --folder-id="$YC_FOLDER_ID" --format=json | jq -r '.network_interfaces[0].primary_v4_address.one_to_one_nat.address')
-if [ -z "$VM_IP" ] || [ "$VM_IP" = "null" ]; then
-    echo "Error: Failed to get IP address"
-    exit 1
+    VM_IP=$(yc compute instance get "$VM_ID" --folder-id="$YC_FOLDER_ID" --format=json | jq -r '.network_interfaces[0].primary_v4_address.one_to_one_nat.address')
+    if [ -z "$VM_IP" ] || [ "$VM_IP" = "null" ]; then
+        echo "Error: Failed to get IP address"
+        exit 1
+    fi
 fi
 
 echo "VM IP: $VM_IP"
