@@ -5,6 +5,7 @@ import (
 	"log"
 	"sem1-final-project-hard-level/internal/database/models"
 	"sem1-final-project-hard-level/internal/handlers/prices/helpers"
+	"sem1-final-project-hard-level/internal/validation"
 	"strconv"
 	"strings"
 	"time"
@@ -100,7 +101,7 @@ func parseAndValidateRecord(record []string) (*models.Prices, error) {
 	}
 
 	// парсим дату
-	createdAt, err := time.Parse("2006-01-02", strings.TrimSpace(record[4]))
+	createdAt, err := time.Parse(validation.TIMEFORMAT, strings.TrimSpace(record[4]))
 	if err != nil {
 		return nil, fmt.Errorf("invalid date: %v", err)
 	}

@@ -12,7 +12,7 @@ func Deref[T any](field reflect.Value) (T, bool) {
 		return zero, false
 	}
 
-	if field.Kind() == reflect.Ptr {
+	if field.Kind() == reflect.Pointer {
 		if field.IsNil() {
 			return zero, false
 		}
