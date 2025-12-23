@@ -4,6 +4,7 @@ set -e
 
 SCRIPT_DIR="$(dirname "$0")"
 source "$SCRIPT_DIR/../../configs/.env"
+echo $SCRIPT_DIR
 source "$SCRIPT_DIR/utils.sh"
 SSH_COMMON_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=30"
 
@@ -11,7 +12,7 @@ echo "Installing dependencies on $VM_IP"
 
 # check SSH connection
 set +e
-check_ssh $SSH_USER $VM_IP
+wait_ssh $SSH_USER $VM_IP
 set -e
 
 echo "Installing Docker..."

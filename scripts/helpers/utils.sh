@@ -16,8 +16,8 @@ update_env_var() {
     fi
 }
 
-# check ssh
-check_ssh() {
+# wait ssh
+wait_ssh() {
     local SSH_USER="$1"
     local VM_IP="$2"
 

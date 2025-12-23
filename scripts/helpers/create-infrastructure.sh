@@ -118,7 +118,7 @@ echo "VM IP: $VM_IP"
 
 set +e
 # check SSH connection
-check_ssh $SSH_USER $VM_IP
+wait_ssh $SSH_USER $VM_IP
 set -e
 
 # update env

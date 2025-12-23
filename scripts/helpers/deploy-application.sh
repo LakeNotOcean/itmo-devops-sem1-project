@@ -11,7 +11,7 @@ echo "Deploying application to $VM_IP"
 
 # check SSH connection
 set +e
-check_ssh $SSH_USER $VM_IP
+wait_ssh $SSH_USER $VM_IP
 set -e
 
 echo "Creating archive..."
