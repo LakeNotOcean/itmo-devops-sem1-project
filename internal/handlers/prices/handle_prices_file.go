@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// выбор обработчика в зависимости от типа архива
 func handlePricesFile(db *gorm.DB, filePath string, dataFileName string, batchSize int, format enum.FormatType) (*dto.UploadPricesResult, error) {
 	switch format {
 	case enum.FormatZip:

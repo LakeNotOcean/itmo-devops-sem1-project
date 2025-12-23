@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// отправка готового контента
+// отправка готового архива с csv-файлом
 func SendArchiveToClient(w http.ResponseWriter, archiveBytes []byte, dataFileName string) {
 	w.Header().Set("Content-Type", "application/zip")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", dataFileName+".zip"))

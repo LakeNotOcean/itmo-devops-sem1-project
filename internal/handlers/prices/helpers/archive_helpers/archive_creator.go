@@ -38,7 +38,7 @@ func CreatePricesArchive(prices []models.Prices, dataFileName string) ([]byte, e
 	return zipBuffer.Bytes(), nil
 }
 
-// создания csv файла с ценами
+// создание csv-файла с ценами
 func createCSVData(prices []models.Prices) ([]byte, error) {
 	csvBuffer := new(bytes.Buffer)
 	csvWriter := csv.NewWriter(csvBuffer)
@@ -48,7 +48,7 @@ func createCSVData(prices []models.Prices) ([]byte, error) {
 		return nil, fmt.Errorf("failed to write CSV header: %v", err)
 	}
 
-	// Записываем данные
+	// записываем данные
 	for _, price := range prices {
 		record := []string{
 			strconv.Itoa(price.ID),

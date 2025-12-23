@@ -24,7 +24,7 @@ func FetchPricesFromDB(db *gorm.DB, params *dto.GetPricesQueryParamsDto) ([]mode
 func buildQuery(db *gorm.DB, params *dto.GetPricesQueryParamsDto) *gorm.DB {
 	query := db.Model(&models.Prices{})
 
-	// Фильтр по дате начала
+	// фильтр по дате начала
 	if params.Start != "" {
 		startTime, err := time.Parse(validation.TIMEFORMAT, params.Start)
 		if err == nil {
@@ -32,7 +32,7 @@ func buildQuery(db *gorm.DB, params *dto.GetPricesQueryParamsDto) *gorm.DB {
 		}
 	}
 
-	// Фильтр по дате окончания
+	// фильтр по дате окончания
 	if params.End != "" {
 		endTime, err := time.Parse(validation.TIMEFORMAT, params.End)
 		if err == nil {
@@ -40,12 +40,12 @@ func buildQuery(db *gorm.DB, params *dto.GetPricesQueryParamsDto) *gorm.DB {
 		}
 	}
 
-	// Фильтр по минимальной цене
+	// фильтр по минимальной цене
 	if params.Min != nil {
 		query = query.Where("price >= ?", *params.Min)
 	}
 
-	// Фильтр по максимальной цене
+	// фильтр по максимальной цене
 	if params.Max != nil {
 		query = query.Where("price <= ?", *params.Max)
 	}

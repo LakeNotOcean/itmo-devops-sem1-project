@@ -13,13 +13,13 @@ import (
 // обработка csv-файла с ценами
 func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPricesResult, error) {
 	// лучше выполнять в одной транзакции
-	// если что - откат
+	// если проблема - откат
 	tx := db.Begin()
 	if tx.Error != nil {
 		return nil, fmt.Errorf("failed to start transaction: %v", tx.Error)
 	}
 	defer func() {
-		// В случае паники также откатываем транзакцию
+		// в случае паники также откатываем транзакцию
 		if r := recover(); r != nil {
 			tx.Rollback()
 			panic(r)

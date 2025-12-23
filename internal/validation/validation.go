@@ -10,7 +10,7 @@ const (
 	TIMEFORMAT = validations.TIMEFORMAT
 )
 
-// функция-обертка, чтобы хоть как-то решить проблему с импортом
+// функция-обертка для того, чтобы решить проблему с импортом
 func SetDefaults[T any](params *T) {
 	enum.SetDefaults(params)
 }
