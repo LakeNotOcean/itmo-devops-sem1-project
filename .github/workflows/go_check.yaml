@@ -233,9 +233,7 @@ jobs:
             Message: ${{ github.event.head_commit.message }}
             
             Jobs status:
-            - Tests: ${{ needs.tests.result }}
-            - Push Docker: ${{ needs.push-docker-images.result }}
+            - Tests: ${{ needs.test.result }}
             - Deploy: ${{ needs.deploy.result }}
-            - Auto Tests: ${{ needs.auto-tests.result }}
 
 
