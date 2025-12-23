@@ -76,16 +76,16 @@ scripts/run.sh
 
 ## Тестирование
 
-    ./scripts/tests.sh 1
-    ![alt text](docs/images/test-1.png)
-    ./scripts/tests.sh 2
-    ![alt text](docs/images/test-2.png)
-    ./scripts/tests.sh 3
-    ![alt text](docs/images/test-3.png)
-    ./scripts/run.sh
-    ![alt text](docs/images/run-sh.png)
-    GitHub Actions
-    ![alt text](docs/images/ci-cd.png)
+./scripts/tests.sh 1
+![alt text](docs/images/test-1.png)
+./scripts/tests.sh 2
+![alt text](docs/images/test-2.png)
+./scripts/tests.sh 3
+![alt text](docs/images/test-3.png)
+./scripts/run.sh
+![alt text](docs/images/run-sh.png)
+GitHub Actions
+![alt text](docs/images/ci-cd.png)
     
 
 ## Контакты
