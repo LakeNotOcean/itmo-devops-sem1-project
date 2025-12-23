@@ -214,6 +214,7 @@ jobs:
 
   # уведомление в чат-боте Телеграма
   telegram-notify:
+    name: Telegram notify
     runs-on: ubuntu-latest
     if: always()
     needs: 
