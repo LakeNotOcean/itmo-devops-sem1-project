@@ -47,3 +47,14 @@ func InitDb(cfg *config.Config) error {
 func GetDb() *gorm.DB {
 	return Db
 }
+
+func CloseDb() error {
+	if Db != nil {
+		sqlDB, err := Db.DB()
+		if err != nil {
+			return fmt.Errorf("failed to get database object: %w", err)
+		}
+		return sqlDB.Close()
+	}
+	return nil
+}

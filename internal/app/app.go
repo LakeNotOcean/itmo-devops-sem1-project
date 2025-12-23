@@ -77,5 +77,8 @@ func (a *App) Run() error {
 
 func (a *App) Close() error {
 	log.Println("Cleaning up resources...")
+	if err := database.CloseDb(); err != nil {
+		return fmt.Errorf("failed to close database connection: %w", err)
+	}
 	return nil
 }
