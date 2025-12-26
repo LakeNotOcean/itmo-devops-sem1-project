@@ -12,17 +12,14 @@ func main() {
 	cfg := config.Load()
 	app := app.New(cfg)
 
-	if err := app.Run(); err != nil {
-		log.Printf("Fatal error: %v\n", err)
-
+	defer func() {
 		if closeErr := app.Close(); closeErr != nil {
 			log.Printf("Error during cleanup: %v", closeErr)
 		}
-		os.Exit(1)
-	}
+	}()
 
-	if err := app.Close(); err != nil {
-		log.Printf("Error during cleanup: %v\n", err)
+	if err := app.Run(); err != nil {
+		log.Printf("Fatal error: %v\n", err)
 		os.Exit(1)
 	}
 }
