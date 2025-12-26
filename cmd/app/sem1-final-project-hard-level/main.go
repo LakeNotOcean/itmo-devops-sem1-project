@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+
 	"sem1-final-project-hard-level/internal/app"
 	"sem1-final-project-hard-level/internal/config"
 )

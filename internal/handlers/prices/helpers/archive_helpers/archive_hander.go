@@ -7,9 +7,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
+
 	"sem1-final-project-hard-level/internal/dto"
 	csvhelpers "sem1-final-project-hard-level/internal/handlers/prices/helpers/csv_helpers"
-	"strings"
 
 	"gorm.io/gorm"
 )

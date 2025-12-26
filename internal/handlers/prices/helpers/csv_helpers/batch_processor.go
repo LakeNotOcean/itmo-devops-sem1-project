@@ -3,12 +3,13 @@ package csvhelpers
 import (
 	"fmt"
 	"log"
-	"sem1-final-project-hard-level/internal/database/models"
-	"sem1-final-project-hard-level/internal/handlers/prices/helpers"
-	"sem1-final-project-hard-level/internal/validation"
 	"strconv"
 	"strings"
 	"time"
+
+	"sem1-final-project-hard-level/internal/database/models"
+	"sem1-final-project-hard-level/internal/handlers/prices/helpers"
+	"sem1-final-project-hard-level/internal/validation"
 
 	"gorm.io/gorm"
 )

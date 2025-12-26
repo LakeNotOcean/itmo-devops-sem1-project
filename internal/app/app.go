@@ -8,10 +8,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sem1-final-project-hard-level/internal/config"
-	"sem1-final-project-hard-level/internal/database"
 	"syscall"
 	"time"
+
+	"sem1-final-project-hard-level/internal/config"
+	"sem1-final-project-hard-level/internal/database"
 )
 
 type App struct {

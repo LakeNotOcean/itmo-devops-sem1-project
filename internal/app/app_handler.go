@@ -1,11 +1,12 @@
 package app
 
 import (
+	"time"
+
 	"sem1-final-project-hard-level/internal/config"
 	custommiddleware "sem1-final-project-hard-level/internal/custom_middleware"
 	"sem1-final-project-hard-level/internal/dto"
 	handlers "sem1-final-project-hard-level/internal/handlers/prices"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

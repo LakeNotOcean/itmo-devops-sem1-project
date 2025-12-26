@@ -1,8 +1,9 @@
 package validations
 
 import (
-	"sem1-final-project-hard-level/internal/validation/registry"
 	"time"
+
+	"sem1-final-project-hard-level/internal/validation/registry"
 
 	"github.com/go-playground/validator/v10"
 )

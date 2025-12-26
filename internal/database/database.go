@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
+
 	"sem1-final-project-hard-level/internal/config"
 	"sem1-final-project-hard-level/internal/database/models"
-	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

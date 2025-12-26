@@ -2,9 +2,10 @@ package enum
 
 import (
 	"fmt"
-	"sem1-final-project-hard-level/internal/validation/registry"
 	"slices"
 	"strings"
+
+	"sem1-final-project-hard-level/internal/validation/registry"
 
 	"github.com/go-playground/validator/v10"
 )
