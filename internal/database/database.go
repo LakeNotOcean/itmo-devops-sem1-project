@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var Db *gorm.DB
+var db *gorm.DB
 
 func InitDb(cfg *config.Config) error {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
@@ -32,11 +32,11 @@ func InitDb(cfg *config.Config) error {
 	)
 
 	var err error
-	Db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: newLogger})
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{Logger: newLogger})
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	err = Db.AutoMigrate(&models.Prices{})
+	err = db.AutoMigrate(&models.Prices{})
 	if err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}
@@ -46,12 +46,12 @@ func InitDb(cfg *config.Config) error {
 }
 
 func GetDb() *gorm.DB {
-	return Db
+	return db
 }
 
 func CloseDb() error {
-	if Db != nil {
-		sqlDB, err := Db.DB()
+	if db != nil {
+		sqlDB, err := db.DB()
 		if err != nil {
 			return fmt.Errorf("failed to get database object: %w", err)
 		}

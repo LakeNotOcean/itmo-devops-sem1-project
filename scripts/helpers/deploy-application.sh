@@ -31,7 +31,6 @@ scp $SSH_COMMON_OPTS \
     deploy.tar.gz "$SSH_USER@$VM_IP:deploy.tar.gz"
 
 echo "Extracting and running on server..."
-
 ssh $SSH_COMMON_OPTS \
     -t -i "$SSH_KEY_PRIVATE" \
     "$SSH_USER@$VM_IP" bash <<ENDSSH
