@@ -3,32 +3,24 @@ package csvhelpers
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
 	"sem1-final-project-hard-level/internal/database/models"
 	"sem1-final-project-hard-level/internal/handlers/prices/helpers"
 	"sem1-final-project-hard-level/internal/validation"
-
-	"gorm.io/gorm"
 )
 
 // результат валидации пачки записей
 type batchResult struct {
-	validRecords    []models.Prices
-	validCount      int
-	duplicatesCount int
+	validRecords []models.Prices
 }
 
 // валидация пачки записей
-func processBatch(tx *gorm.DB, batch [][]string, seenIDs map[int]bool) (*batchResult, error) {
+func processBatch(batch [][]string) (*batchResult, error) {
 	result := &batchResult{}
-	// массив ID пачки для проверки в БД на дубликаты
-	var recordIDs []int
-	recordMap := make(map[int]*models.Prices)
 
-	// парсим записи и собираем ID для проверки дубликатов по ID в БД
+	// парсим записи
 	for _, record := range batch {
 		parsed, err := parseAndValidateRecord(record)
 		log.Println("Parsed: ", parsed)
@@ -37,33 +29,7 @@ func processBatch(tx *gorm.DB, batch [][]string, seenIDs map[int]bool) (*batchRe
 			continue
 		}
 
-		// дубликаты в пачке, пропускаем
-		if seenIDs[parsed.ID] {
-			result.duplicatesCount++
-			continue
-		}
-
-		seenIDs[parsed.ID] = true
-		recordIDs = append(recordIDs, parsed.ID)
-		recordMap[parsed.ID] = parsed
-	}
-
-	// получаем дубликаты в БД
-	existingIDs, err := getExistingIDs(tx, recordIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	// валидные записи собираем для вставки
-	for _, parsed := range recordMap {
-		// дубликаты в БД игнорируем
-		if existingIDs[parsed.ID] {
-			result.duplicatesCount++
-			continue
-		}
-
 		result.validRecords = append(result.validRecords, *parsed)
-		result.validCount++
 	}
 
 	return result, nil
@@ -76,25 +42,20 @@ func parseAndValidateRecord(record []string) (*models.Prices, error) {
 		return nil, fmt.Errorf("record has less than 5 fields")
 	}
 
-	// парсим ID
-	id, err := strconv.Atoi(strings.TrimSpace(record[0]))
-	if err != nil {
-		return nil, fmt.Errorf("invalid ID: %v", err)
-	}
-
+	// игнорируем ID, так как используем инкрементацию
 	// имя
 	name := strings.TrimSpace(record[1])
 	if len(name) > 255 || name == "" {
 		return nil, fmt.Errorf("invalid name: %v", name)
 	}
 
-	// категорию
+	// категория
 	category := strings.TrimSpace(record[2])
 	if len(category) > 255 || category == "" {
 		return nil, fmt.Errorf("invalid category: %v", category)
 	}
 
-	// цену
+	// цена
 	priceStr := strings.TrimSpace(record[3])
 	price, err := helpers.ParsePriceWithRegex(priceStr)
 	if err != nil {
@@ -108,34 +69,10 @@ func parseAndValidateRecord(record []string) (*models.Prices, error) {
 	}
 
 	return &models.Prices{
-		ID:         id,
+		ID:         0,
 		CreateDate: createdAt,
 		Name:       name,
 		Category:   category,
 		Price:      price,
 	}, nil
-}
-
-// получение ID из БД
-func getExistingIDs(tx *gorm.DB, ids []int) (map[int]bool, error) {
-	existingIDs := make(map[int]bool)
-
-	if len(ids) == 0 {
-		return existingIDs, nil
-	}
-
-	// ID из БД
-	var existing []int
-
-	if err := tx.Model(&models.Prices{}).
-		Where("id IN ?", ids).
-		Pluck("id", &existing).Error; err != nil {
-		return nil, err
-	}
-
-	for _, id := range existing {
-		existingIDs[id] = true
-	}
-
-	return existingIDs, nil
 }

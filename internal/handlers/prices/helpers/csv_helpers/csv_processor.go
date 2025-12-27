@@ -9,6 +9,7 @@ import (
 	"sem1-final-project-hard-level/internal/dto"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // обработка csv-файла с ценами
@@ -42,8 +43,6 @@ func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPrices
 
 	// обработка по пачке
 	for {
-		// дубликаты ID в пачке
-		seenIDs := make(map[int]bool)
 
 		// получение пачки
 		batch, err := readCSVBatch(csvReader, batchSize)
@@ -59,24 +58,33 @@ func ProcessCSV(db *gorm.DB, reader io.Reader, batchSize int) (*dto.UploadPrices
 		result.TotalCount += len(batch)
 
 		// обработка пачки, валидация данных
-		batchResult, err := processBatch(tx, batch, seenIDs)
+		batchResult, err := processBatch(batch)
 		if err != nil {
 			tx.Rollback()
 			return nil, fmt.Errorf("failed to process batch: %v", err)
 		}
-
-		result.DuplicatesCount += batchResult.duplicatesCount
-		result.TotalItems += batchResult.validCount
 
 		if len(batchResult.validRecords) == 0 {
 			continue
 		}
 
 		// непосредственная вставка валидных данных в БД
-		if err := tx.Create(&batchResult.validRecords).Error; err != nil {
+		insertResult := tx.Clauses(clause.OnConflict{Columns: []clause.Column{
+			{Name: "create_date"},
+			{Name: "name"},
+			{Name: "category"},
+			{Name: "price"},
+		}, DoNothing: true}).Create(&batchResult.validRecords)
+		if insertResult.Error != nil {
 			tx.Rollback()
-			return nil, fmt.Errorf("failed to insert batch: %v", err)
+			return nil, fmt.Errorf("failed to insert batch: %v", insertResult.Error)
 		}
+
+		// после вставки - учитываем результат
+		result.TotalItems += int(insertResult.RowsAffected)
+		// дубликаты не должны были быть добавлены
+		result.DuplicatesCount += len(batchResult.validRecords) - int(insertResult.RowsAffected)
+
 		if err == io.EOF {
 			break
 		}
@@ -111,14 +119,11 @@ func readCSVBatch(reader *csv.Reader, batchSize int) ([][]string, error) {
 
 // получение статистики
 func calculateStatistics(tx *gorm.DB, result *dto.UploadPricesResult) error {
-	// общее количество категорий
-	if err := tx.Model(&models.Prices{}).Distinct("category").Count(&result.TotalCategories).Error; err != nil {
-		return fmt.Errorf("failed to count categories: %v", err)
-	}
+	// получение общего количества категорий и суммарной стоимости
+	row := tx.Model(&models.Prices{}).Select("COUNT(DISTINCT category) as total_categories, COALESCE(SUM(price), 0) as total_price").Row()
 
-	// суммарная стоимость
-	if err := tx.Model(&models.Prices{}).Select("COALESCE(SUM(price), 0)").Scan(&result.TotalPrice).Error; err != nil {
-		return fmt.Errorf("failed to calculate total price: %v", err)
+	if err := row.Scan(&result.TotalCategories, &result.TotalPrice); err != nil {
+		return fmt.Errorf("failed to calculate statistics: %v", err)
 	}
 
 	return nil
